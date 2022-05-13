@@ -1,0 +1,19 @@
+{
+    "apps": [
+        {
+            "name": "APIGateway",
+            "script": "./APIGateway",
+            "watch": false,
+            "node_args": [
+                "--max-old-space-size=8192"
+            ],
+            "merge_logs": true,
+            "kill_timeout": 3000,
+            "cwd": ".",
+            "exec_mode": "fork",
+            "instances": 1,
+            "autorestart": true,
+            "max_memory_restart": "12G"
+        }
+    ]
+}
