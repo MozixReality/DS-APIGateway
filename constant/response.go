@@ -1,6 +1,7 @@
 package constant
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,17 +15,15 @@ const (
 
 const (
 	ERROR_DATABASE = iota + 10000
-	ERROR_HANDLE_MEDIA
-	ERROR_TOKEN_CLAIMS_PARSING_FAILED
+	PERMISSION_DENIED
 )
 
 var msgFlags = map[int]string{
-	SUCCESS:                           "Ok",
-	INVALID_PARAMS:                    "Invalid params error",
-	ERROR:                             "Fail",
-	ERROR_DATABASE:                    "Error retrieving from database",
-	ERROR_HANDLE_MEDIA:                "Error handling media upload to CDN",
-	ERROR_TOKEN_CLAIMS_PARSING_FAILED: "Failed to parse token claims",
+	SUCCESS:           "Ok",
+	INVALID_PARAMS:    "Invalid params error",
+	ERROR:             "Fail",
+	ERROR_DATABASE:    "Error retrieving from database",
+	PERMISSION_DENIED: "Permission denied",
 }
 
 type Response struct {
@@ -43,5 +42,18 @@ func ResponseWithData(c *gin.Context, httpCode, respCode int, data interface{}) 
 		Message: msg,
 		Data:    data,
 	}
+	c.JSON(httpCode, response)
+}
+
+func ResponseWithBody(c *gin.Context, httpCode int, body []byte) {
+	var response Response
+	var data interface{}
+	err := json.Unmarshal(body, &data)
+	if err != nil {
+		response.Code = ERROR
+	}
+	response.Code = http.StatusOK
+	response.Message = "Ok"
+	response.Data = data
 	c.JSON(httpCode, response)
 }

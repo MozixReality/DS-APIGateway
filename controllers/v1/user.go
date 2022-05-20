@@ -7,14 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type LoginResp struct {
-	Token 	string	`json:"token" binding:"required"`
-	Expire 	int		`json:"expire" binding:"required"`
-}
-
 type LoginReq struct {
-	Username string `json:"username" binding:"required" example:"mozixreality"`
-	Password string `json:"password" binding:"required" example:"Abcd1234"`
+	Username string `json:"username" url:"username" binding:"required" example:"mozixreality"`
+	Password string `json:"password" url:"password" binding:"required" example:"Abcd1234"`
 }
 
 // @Summary Sign up
@@ -24,11 +19,17 @@ type LoginReq struct {
 // @Failure 500 {object} constant.Response
 // @Router /sign_up [post]
 func SignUp(c *gin.Context) {
-	loginResp := LoginResp{
-		Token: "quWIU3287fnU",
-		Expire: 7200,
+	var loginReq LoginReq
+	if err := c.ShouldBindJSON(&loginReq); err != nil {
+		constant.ResponseWithData(c, http.StatusBadRequest, constant.INVALID_PARAMS, err.Error())
+		return
 	}
-	constant.ResponseWithData(c, http.StatusOK, constant.SUCCESS, loginResp)
+	body, err := constant.RequestToService(constant.ServiceUser, http.MethodPost, "/sign_up", nil, loginReq)
+	if err != nil {
+		constant.ResponseWithData(c, http.StatusBadRequest, constant.ERROR, err.Error())
+		return
+	}
+	constant.ResponseWithBody(c, http.StatusOK, body)
 }
 
 // @Summary Sign in
@@ -38,9 +39,15 @@ func SignUp(c *gin.Context) {
 // @Failure 500 {object} constant.Response
 // @Router /sign_in [post]
 func SignIn(c *gin.Context) {
-	loginResp := LoginResp{
-		Token: "quWIU3287fnU",
-		Expire: 7200,
+	var loginReq LoginReq
+	if err := c.ShouldBindJSON(&loginReq); err != nil {
+		constant.ResponseWithData(c, http.StatusBadRequest, constant.INVALID_PARAMS, err.Error())
+		return
 	}
-	constant.ResponseWithData(c, http.StatusOK, constant.SUCCESS, loginResp)
+	body, err := constant.RequestToService(constant.ServiceUser, http.MethodPost, "/sign_in", nil, loginReq)
+	if err != nil {
+		constant.ResponseWithData(c, http.StatusBadRequest, constant.ERROR, err.Error())
+		return
+	}
+	constant.ResponseWithBody(c, http.StatusOK, body)
 }

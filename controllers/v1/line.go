@@ -8,14 +8,14 @@ import (
 )
 
 type LineAccount struct {
-	Nickname 		string 	`json:"nick_name" binding:"required" example:"mozix"`
-	ChannelID 		string 	`json:"channel_id" binding:"required" example:"1656452143"`
-	ChannelSecret 	string 	`json:"channel_secret" binding:"required" example:"05425dffa740b7c5d81f89fc5993e074"`
+	Nickname      string `json:"nick_name" binding:"required" example:"mozix"`
+	AccessToken   string `json:"access_token" binding:"required" example:"+ArlB6Bg1AJjq8rT6hzn0jVd5JLOpWOy3rYoLUg/GuyfgzyKMImccgXuyAvI7Mhyxr9/NH7opIcxP/0D1s4/LbuvNDSFQAlPPrQOot8wPWlnI1sO51R+ugG6Onsf6fo/faarHspzWABrV3QckCZeWwdB04t89/1O/w1cDnyilFU="`
+	ChannelSecret string `json:"channel_secret" binding:"required" example:"05425dffa740b7c5d81f89fc5993e074"`
 }
 
 type LineMessage struct {
-	Nickname 	string 	`json:"nick_name" example:"mozix"`
-	Message 	string 	`json:"message" example:"Hello there~"`
+	Nickname string `json:"nick_name" example:"mozix"`
+	Message  string `json:"message" example:"Hello there~"`
 }
 
 // @Summary Get Line Info
@@ -25,8 +25,24 @@ type LineMessage struct {
 // @Failure 500 {object} constant.Response
 // @Router /line_info [get]
 func GetLineInfo(c *gin.Context) {
-	LineAccounts := []LineAccount{}
-	constant.ResponseWithData(c, http.StatusOK, constant.SUCCESS, LineAccounts)
+	userID, ok := c.Get("user_id")
+	if !ok {
+		constant.ResponseWithData(c, http.StatusForbidden, constant.PERMISSION_DENIED, nil)
+		return
+	}
+	params := struct {
+		UserID string `url:"user_id"`
+	}{
+		UserID: userID.(string),
+	}
+
+	body, err := constant.RequestToService(constant.ServiceLine, http.MethodGet, "/line_info", c.Request.Body, params)
+	if err != nil {
+		constant.ResponseWithData(c, http.StatusOK, constant.ERROR, err.Error())
+		return
+	}
+
+	constant.ResponseWithBody(c, http.StatusOK, body)
 }
 
 // @Summary Update Line Info
@@ -37,7 +53,36 @@ func GetLineInfo(c *gin.Context) {
 // @Failure 500 {object} constant.Response
 // @Router /line_info [put]
 func UpdateLineInfo(c *gin.Context) {
-	constant.ResponseWithData(c, http.StatusOK, constant.SUCCESS, nil)
+	userID, ok := c.Get("user_id")
+	if !ok {
+		constant.ResponseWithData(c, http.StatusForbidden, constant.PERMISSION_DENIED, nil)
+		return
+	}
+	var lineAccount LineAccount
+	if err := c.ShouldBindJSON(&lineAccount); err != nil {
+		constant.ResponseWithData(c, http.StatusBadRequest, constant.INVALID_PARAMS, nil)
+		return
+	}
+
+	params := struct {
+		UserID        string `url:"user_id"`
+		AccessToken   string `url:"access_token"`
+		ChannelSecret string `url:"channelSecret"`
+		NickName      string `url:"nick_name"`
+	}{
+		UserID:        userID.(string),
+		AccessToken:   lineAccount.AccessToken,
+		ChannelSecret: lineAccount.ChannelSecret,
+		NickName:      lineAccount.Nickname,
+	}
+
+	body, err := constant.RequestToService(constant.ServiceLine, http.MethodPut, "/line_info", nil, params)
+	if err != nil {
+		constant.ResponseWithData(c, http.StatusOK, constant.ERROR, err.Error())
+		return
+	}
+
+	constant.ResponseWithBody(c, http.StatusOK, body)
 }
 
 // @Summary Send Line Message
