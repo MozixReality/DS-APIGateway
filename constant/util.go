@@ -16,12 +16,18 @@ func ReadConfig(configPath string) {
 	viper.SetDefault("WRITE_TIMEOUT", 60)
 	viper.SetDefault("REQUEST_TIMEOUT", 60)
 
+	viper.SetDefault("KAFKA_URL", "localhost:9092")
+	viper.SetDefault("TOPIC", "LineMsg")
+
 	envs := []string{
 		"PORT",
 		"RUN_MODE",
 		"READ_TIMEOUT",
 		"WRITE_TIMEOUT",
 		"REQUEST_TIMEOUT",
+
+		"KAFKA_URL",
+		"TOPIC",
 	}
 
 	for _, env := range envs {

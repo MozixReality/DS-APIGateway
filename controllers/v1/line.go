@@ -2,9 +2,13 @@ package v1
 
 import (
 	"APIGateway/constant"
+	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/segmentio/kafka-go"
+	"github.com/spf13/viper"
 )
 
 type LineAccount struct {
@@ -67,7 +71,7 @@ func UpdateLineInfo(c *gin.Context) {
 	params := struct {
 		UserID        string `url:"user_id"`
 		AccessToken   string `url:"access_token"`
-		ChannelSecret string `url:"channelSecret"`
+		ChannelSecret string `url:"channel_secret"`
 		NickName      string `url:"nick_name"`
 	}{
 		UserID:        userID.(string),
@@ -93,5 +97,33 @@ func UpdateLineInfo(c *gin.Context) {
 // @Failure 500 {object} constant.Response
 // @Router /send_message [post]
 func SendLineMessage(c *gin.Context) {
+	userID, ok := c.Get("user_id")
+	if !ok {
+		constant.ResponseWithData(c, http.StatusForbidden, constant.PERMISSION_DENIED, nil)
+		return
+	}
+
+	var lineMessage LineMessage
+	if err := c.ShouldBindJSON(&lineMessage); err != nil {
+		constant.ResponseWithData(c, http.StatusBadRequest, constant.INVALID_PARAMS, err.Error())
+		return
+	}
+
+	writer := kafka.Writer{
+		Addr:     kafka.TCP(viper.GetString("KAFKA_URL")),
+		Topic:    viper.GetString("TOPIC"),
+		Balancer: &kafka.LeastBytes{},
+	}
+	defer writer.Close()
+
+	msg := kafka.Message{
+		Value: []byte(fmt.Sprintf("%s==========%s==========%s", userID, lineMessage.Nickname, lineMessage.Message)),
+	}
+	err := writer.WriteMessages(context.Background(), msg)
+	if err != nil {
+		constant.ResponseWithData(c, http.StatusBadRequest, constant.ERROR, err.Error())
+		return
+	}
+
 	constant.ResponseWithData(c, http.StatusOK, constant.SUCCESS, nil)
 }

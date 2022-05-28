@@ -2,7 +2,6 @@ package v1_test
 
 import (
 	"APIGateway/constant"
-	"APIGateway/postgresql"
 	"os"
 	"testing"
 
@@ -17,11 +16,9 @@ type test struct {
 
 func setUp() {
 	constant.ReadConfig("../../../.env")
-	postgresql.Initialize()
 }
 
 func tearDown() {
-	postgresql.Dispose()
 }
 
 func TestMain(m *testing.M) {
