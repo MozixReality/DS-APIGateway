@@ -27,7 +27,7 @@ func InitRouter() *gin.Engine {
 	config.AllowCredentials = true
 	config.AllowWildcard = true
 	config.AllowOriginFunc = func(origin string) bool {
-		allowOriginDomains := []string{"localhost", "127.0.0.1", "aralego.com", "showmore.cc"}
+		allowOriginDomains := []string{"localhost", "127.0.0.1", "cthua.ebg.tw"}
 		for _, d := range allowOriginDomains {
 			if strings.Contains(origin, d) {
 				return true
@@ -53,7 +53,6 @@ func InitRouter() *gin.Engine {
 	router.GET("/line_info", v1.GetLineInfo)
 	router.PUT("/line_info", v1.UpdateLineInfo)
 	router.POST("/send_message", v1.SendLineMessage)
-
 
 	return router
 }
