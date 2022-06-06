@@ -3,8 +3,8 @@
 ```
 make install
 ```
-Will generate APIGetway in root directory
-if you encounter /bin/bash: swag: command not found, try the following method
+Will generate APIGetway in the directory. <br>
+If you encounter /bin/bash: swag: command not found, try the following method
 1. To go/bin directory
 2. type ```PATH=$(go env GOPATH)/bin:$PATH```
 
