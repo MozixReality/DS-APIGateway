@@ -1,5 +1,12 @@
 # API Getway
 ## Quick Start
+### Select the ENV
+```
+export ENV=compliance
+```
+swagger document can only start in local or compliance ENV <br>
+
+### Compile
 ```
 make install
 ```
@@ -16,4 +23,4 @@ To start server, it should only execute the APIGetway like
 
 # API
 ## Swagger
-After starting the server, the swagger document can see at ```https://mozixreality.ebg.tw/swagger/index.html```
+After starting the server, the swagger document can see at ```https://mozixreality.ebg.tw/swagger/index.html``` or ```https://localhost:55688/swagger/index.html```
